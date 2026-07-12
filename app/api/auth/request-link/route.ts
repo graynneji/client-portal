@@ -6,8 +6,7 @@ import { db } from "@/lib/db";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Mentel <hello@mail.trymentel.com>";
-// const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trymentel.com";
-const APP_URL = "localhost:3000";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trymentel.com";
 const TOKEN_TTL_MINUTES = 15;
 
 export async function POST(req: Request) {
