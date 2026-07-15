@@ -1,0 +1,121 @@
+// prisma/schema.prisma
+//
+// IMPORTANT: this project shares the SAME Postgres database as the main
+// trymentel.com app — point DATABASE_URL at the exact same connection
+// string. This schema only describes the tables this app actually reads/
+// writes; the main app's schema.prisma remains the single source of truth
+// for the full database structure.
+//
+// This project NEVER runs `prisma migrate` — only `prisma generate` (see
+// postinstall in package.json). All schema changes (adding a column,
+// changing a model) happen in the main app's migrations; if you add a
+// field there that this app needs, mirror it here afterward and re-run
+// `prisma generate`, don't migrate from here.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Mirrors the main app's Lead model — only the fields this portal reads.
+model Lead {
+  id    String  @id @default(cuid())
+  name  String
+  email String
+  phone String?
+
+  clientAccount ClientAccount?
+  packages      Package[]
+
+  @@map("leads")
+}
+
+/// Mirrors the main app's Payment model — only the fields this portal reads.
+model Payment {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now()) @map("created_at")
+  leadId     String    @map("lead_id")
+  amountKobo Int       @map("amount_kobo")
+  currency   String    @default("NGN")
+  status     String    @default("pending")
+  method     String    @default("transfer")
+  reference  String?   @unique
+  paidAt     DateTime? @map("paid_at")
+  notes      String?
+
+  package Package?
+
+  @@map("payments")
+}
+
+model ClientAccount {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  leadId String @unique @map("lead_id")
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  email String @unique
+
+  @@map("client_accounts")
+}
+
+model ClientLoginToken {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  clientAccountId String    @map("client_account_id")
+  token           String    @unique
+  expiresAt       DateTime  @map("expires_at")
+  usedAt          DateTime? @map("used_at")
+
+  @@index([token])
+  @@map("client_login_tokens")
+}
+
+model Package {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  leadId String @map("lead_id")
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  paymentId String  @unique @map("payment_id")
+  payment   Payment @relation(fields: [paymentId], references: [id])
+
+  planType      String   @map("plan_type")
+  totalSessions Int      @map("total_sessions")
+  usedSessions  Int      @default(0) @map("used_sessions")
+  periodStart   DateTime @map("period_start")
+  periodEnd     DateTime @map("period_end")
+  status        String   @default("active")
+
+  scheduledSessions ScheduledSession[]
+
+  @@index([leadId])
+  @@index([status])
+  @@map("packages")
+}
+
+model ScheduledSession {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  packageId String  @map("package_id")
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  scheduledAt   DateTime @map("scheduled_at")
+  status        String   @default("scheduled")
+  therapist     String?
+  notes         String?
+  calBookingUid String?  @map("cal_booking_uid")
+
+  @@index([packageId])
+  @@index([scheduledAt])
+  @@map("scheduled_sessions")
+}

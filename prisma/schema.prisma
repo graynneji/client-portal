@@ -13,7 +13,7 @@
 // `prisma generate`, don't migrate from here.
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
    output   = "../generated/prisma"
 }
 
@@ -113,6 +113,7 @@ model ScheduledSession {
   status      String   @default("scheduled")
   therapist   String?
   notes       String?
+  calBookingUid String? @map("cal_booking_uid")
 
   @@index([packageId])
   @@index([scheduledAt])

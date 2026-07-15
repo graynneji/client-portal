@@ -53,6 +53,7 @@ export async function POST(req: Request) {
           <a href="${link}" style="display:inline-block;margin:16px 0;padding:12px 24px;background:linear-gradient(135deg,#4e7a5e,#3d8b8b);color:#fff;text-decoration:none;border-radius:12px;font-weight:600;">
             Sign in
           </a>
+          ${link}
           <p style="color:#a0b8ac;font-size:12px;">If you didn't request this, you can safely ignore this email.</p>
         </div>
       `,
