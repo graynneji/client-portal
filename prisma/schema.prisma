@@ -85,8 +85,8 @@ model Package {
   leadId String @map("lead_id")
   lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
-  paymentId String  @unique @map("payment_id")
-  payment   Payment @relation(fields: [paymentId], references: [id])
+  paymentId String?  @unique @map("payment_id") // nullable — admin-granted bonus sessions have no real payment
+  payment   Payment? @relation(fields: [paymentId], references: [id])
 
   planType      String   @map("plan_type")
   totalSessions Int      @map("total_sessions")
